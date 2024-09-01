@@ -9,7 +9,7 @@
 #include <stdint.h>  // For fixed-size integer types
 #include <arpa/inet.h>  // For htonl and ntohl
 
-#define CHUNK_SIZE 1024  // Define a larger chunk size (32k) for processing
+#define CHUNK_SIZE 32768  // Define a larger chunk size (32k) for processing
 
 // Error handling function
 void handle_errors(const char *message) {
