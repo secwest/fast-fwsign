@@ -279,13 +279,13 @@ The chunked version of this utility allows processing files larger than main mem
 
 ## **Why AES-256-CBC is Acceptable in This Use Case**
 
-**AES-256-CBC Overview**:  
+#### **AES-256-CBC Overview**:  
    * **AES (Advanced Encryption Standard)**: AES is a widely accepted and trusted encryption standard. AES-256 refers to using a 256-bit key, providing a high level of security.  
    * **CBC (Cipher Block Chaining) Mode**: In CBC mode, each block of plaintext is XORed with the previous ciphertext block before being encrypted. An initialization vector (IV) is used to ensure that identical plaintext blocks do not result in identical ciphertext blocks.  
-**Security Concerns with CBC**:  
+#### **Security Concerns with CBC**:  
    * CBC mode can be vulnerable to certain types of attacks, such as padding oracle attacks if not implemented correctly. These attacks exploit the predictable nature of padding bytes to decrypt messages without knowing the encryption key.  
    * However, these vulnerabilities are typically associated with scenarios where the attacker can manipulate the ciphertext and observe the decryption errors, which is not the case here.
-**Why CBC is Acceptable for Key Encryption**:  
+#### **Why CBC is Acceptable for Key Encryption**:  
    * **Controlled Environment**: The private key file is stored in a controlled environment, and there is no exposure to external manipulation or decryption attempts that would enable padding oracle attacks.  
    * **Single Encryption Operation**: The private key is encrypted once and stored securely. The file is not subject to multiple encryptions or modifications that could introduce vulnerabilities.  
    * **Additional Protection Layers**: The use of a strong, randomly generated IV and a high-entropy password provides sufficient protection. The IV ensures that each encryption operation results in different ciphertext, even if the same key and plaintext are used. A securely derived key using PBKDF2 further reduces the risk of attacks.  
