@@ -99,6 +99,7 @@
 #include <arpa/inet.h>  // For htonl and ntohl
 
 #define CHUNK_SIZE 32768  // Define a larger chunk size (32k) for processing
+#define MAX_SIG_LEN 256   // Define a maximum expected signature length to prevent overflow
 
 // Error handling function
 void handle_errors(const char *message) {
@@ -400,6 +401,11 @@ void decrypt(const char *input_file, const char *output_file, const char *privat
 
     printf("Read signature length: %zu\n", sig_len);
 
+    // Check if the signature length is reasonable
+    if (sig_len == 0 || sig_len > MAX_SIG_LEN) {
+        handle_errors("Invalid signature length detected");
+    }
+
     // Move back by the signature length to read the signature
     fseek(in_file, -(long)(sizeof(sig_len_net) + sig_len), SEEK_END);
     sig = malloc(sig_len);
@@ -412,7 +418,15 @@ void decrypt(const char *input_file, const char *output_file, const char *privat
     // Calculate ciphertext length
     size_t ciphertext_len = file_size - sizeof(nonce) - sizeof(sig_len_net) - sig_len;
 
-    if (ciphertext_len <= 0) handle_errors("Invalid ciphertext length calculated");
+    // Check for valid ciphertext length
+    if (ciphertext_len <= 0 || ciphertext_len > file_size) {
+        handle_errors("Invalid ciphertext length calculated");
+    }
+
+    // Check if the file is too short to contain the expected data
+    if (file_size < sizeof(nonce) + sig_len + sizeof(sig_len_net)) {
+        handle_errors("File is too short to contain the expected data");
+    }
 
     printf("File size: %zu, Ciphertext length: %zu, Signature length: %zu\n", file_size, ciphertext_len, sig_len);
 
