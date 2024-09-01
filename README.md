@@ -28,11 +28,11 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
  If the utility runs and displays a usage message, the compilation was successful.
 
- **Usage Instructions**
+ ### **Usage Instructions**
 
  The `fast-fwsign` utility supports three main operations: generating ECDSA key pairs, encrypting a file, and decrypting a file.
 
- **1\. Generating ECDSA Key Pairs**
+ #### **1\. Generating ECDSA Key Pairs**
 
  To generate a pair of ECDSA keys (private and public), use the `keygen` command:
 
@@ -46,7 +46,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
 *  `<password>`: Password to encrypt the private key.
 
- **Example**:
+ #### **Example**:
 
  `./fast-fwsign keygen priv.key pub.key mypassword`
 
@@ -54,7 +54,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
  This command generates a private key encrypted with the password `mypassword` and a corresponding public key.
 
- **2\. Encrypting a File**
+ #### **2\. Encrypting a File**
 
  To encrypt a file using ChaCha20-Poly1305 and sign it using ECDSA, use the `encrypt` command:
 
@@ -72,7 +72,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
 *  `<password>`: Password to decrypt the sender’s private key.
 
- **Example**:
+ #### **Example**:
 
  `./fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword`
 
@@ -80,7 +80,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
  This command encrypts `firmware.bin`, signs it, and saves the result in `firmware.crypt`.
 
- **3\. Decrypting a File**
+ #### **3\. Decrypting a File**
 
  To decrypt a file and verify its signature, use the `decrypt` command:
 
@@ -98,7 +98,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
 *  `<password>`: Password to decrypt the receiver’s private key.
 
- **Example**:
+ #### **Example**:
 
  `./fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender_pub.key mypassword`
 
@@ -106,7 +106,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
  This command decrypts `firmware.crypt`, verifies the signature using the sender's public key, and saves the result in `firmware.dec`.
 
- **Notes and Best Practices**
+ ### **Notes and Best Practices**
 
 *  **Key Management**: Keep your private keys secure and use strong, unique passwords. Compromise of a private key would allow an attacker to decrypt data and impersonate the key owner.
 
@@ -116,7 +116,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
 *  **Signature Verification**: Always verify the signature after decryption to ensure the authenticity and integrity of the data.
 
- **Example Workflow**
+ #### **Example Workflow**
 
  Generate key pairs for both the sender and receiver:  `./fast-fwsign keygen sender_priv.key sender_pub.key senderpass`
 
