@@ -262,18 +262,18 @@ The chunked version of this utility allows processing files larger than main mem
 
 # **Why Encrypt Private Keys at Rest?**
 
- **Protection Against Unauthorized Access**:  
+#### **Protection Against Unauthorized Access**:  
    * **Threat Model**: Private key files might be accessible to attackers who gain unauthorized access to the file system. Without encryption, these keys could be directly misused to decrypt data, impersonate the key owner, or sign malicious information.  
    * **Password Protection**: By encrypting the private key with a password, unauthorized users cannot easily access or misuse the key, even if they manage to obtain the encrypted file.  
- **Compliance with Security Standards**:  
+#### **Compliance with Security Standards**:  
    * Encrypting private keys at rest is recommended by various security standards and best practices, such as PCI-DSS and NIST guidelines. It helps prevent unauthorized access and ensures compliance with regulatory requirements, which often mandate that sensitive data be protected.  
- **Mitigation of Key Extraction Attacks**:  
+#### **Mitigation of Key Extraction Attacks**:  
    * Even if attackers obtain the encrypted private key file, they must still crack the password, or extract the separately stored password to access the key. 
    * Using a salt and multiple iterations in the KDF process helps protect against brute-force and dictionary attacks, ensuring that even if an attacker has powerful resources, the process remains secure.  
- **Maintaining Data Integrity and Authenticity**:  
+#### **Maintaining Data Integrity and Authenticity**:  
    * Encrypting private keys with passwords ensures that only authorized individuals can decrypt, sign, or use them, preserving the integrity and authenticity of the data.  
    * This measure prevents unauthorized users from tampering with the data, as they would not have access to the necessary cryptographic keys.  
- **Usability and Security Balance**:  
+#### **Usability and Security Balance**:  
    * Password-based encryption provides a convenient way for users to protect their keys while maintaining ease of use. It allows users to protect their keys with passwords they know, while benefiting from strong cryptographic protection.  
    * Implementing policies for password complexity and rotation can further enhance security over time.
 
