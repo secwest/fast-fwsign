@@ -118,13 +118,19 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
  #### **Example Workflow**
 
- Generate key pairs for both the sender and receiver:  `./fast-fwsign keygen sender_priv.key sender_pub.key senderpass`
+ Generate key pairs for both the sender and receiver:  
+ 
+ `./fast-fwsign keygen sender_priv.key sender_pub.key senderpass`
 
  `./fast-fwsign keygen receiver_priv.key receiver_pub.key receiverpass`
 
- Encrypt the firmware file: `./fast-fwsign encrypt firmware.bin firmware.crypt sender_priv.key receiver_pub.key senderpass`
+ Encrypt the firmware file: 
+ 
+ `./fast-fwsign encrypt firmware.bin firmware.crypt sender_priv.key receiver_pub.key senderpass`
 
- Decrypt and verify the firmware file:  `./fast-fwsign decrypt firmware.crypt firmware.dec receiver_priv.key sender_pub.key receiverpass`
+ Decrypt and verify the firmware file:  
+ 
+ `./fast-fwsign decrypt firmware.crypt firmware.dec receiver_priv.key sender_pub.key receiverpass`
 
  By following these instructions, you can securely encrypt and sign firmware files, ensuring their integrity and authenticity during distribution and deployment.
 
