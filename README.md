@@ -147,14 +147,14 @@ In any case, this is a question I find myself repeatedly answering on device aud
 
 So to that end, to save everyone time and simplify that explanation, I wrote a utility that leverages the OpenSSL cryptography libraries - to avoid roll your own crypto, which leverage the widely audited and verified cryptography implementations in its libcrypto libraries - that implements modern cryptographic best practices for firmware distribution and installation verification.
 
-This is a BSD licensed (to allow use in commercial products) utility written in C to perform the functions needed using current cryptographic algorithm choices suitable for smaller embedded device CPU SoC's, as well as a version of the utility/code that processes the encryption and decryption in smaller data chunks allowing devices to process image files much bigger than their potentially limited available memory at this source code repository. You'll find more documentation about what this code does and why below. I have done a fair bit of testing and trust the implementation because it leverages the well tested OpenSSL code, but by all means I encourage folks to get this audited by others, because while I  am pretty familiar with this topic, I am merely human and better verification and auditing is just good engineering. 
+This is a BSD licensed (to allow use in commercial products) utility written in C to perform the functions needed using current cryptographic algorithm choices suitable for smaller embedded device CPU SoC's, as well as a version of the utility/code that processes the encryption and decryption in smaller data chunks allowing devices to process image files much bigger than their potentially limited available memory space. You'll find more documentation about what this code does and why below. I have done a fair bit of testing and trust the implementation because it leverages the well tested OpenSSL code, but by all means I encourage folks to get this audited by others, because while I am pretty familiar with this topic, I am merely human, and better verification and auditing is just good engineering. 
 
-So I've done most of the heavy cryptography lifting for building a secure firmware update system for you here, BUT THIS IS NOT COMPLETE.
+So I've done most of the heavy cryptography lifting for building a secure firmware update system for you here, **BUT THIS IS NOT COMPLETE**.
 Left as tasks for the implementor are three other aspects of firmware updates that need to be covered:
 
-1. Logging and monitoring of firmware updates. To provide an audit trail in case of security incidents.
-2. Version numbering and anti-rollback mechanisms, so an attacker can't re-install an old vulnerable version of firmware.
-3. Provision of backup keys and a means of invalidating the main key in case of a signing key compromise.
+**1. Logging and monitoring of firmware updates. To provide an audit trail in case of security incidents.**
+**2. Version numbering and anti-rollback mechanisms, so an attacker can't re-install an old vulnerable version of firmware.**
+**3. Provision of backup keys and a means of invalidating the main key in case of a signing key compromise.**
 
 You can use this cryptographic core utility I have provided to achieve all of the above, but it will require other device specific logic that is beyond the scope of this utility.
 Please use this code as you see best fit.
