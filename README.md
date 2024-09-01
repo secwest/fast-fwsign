@@ -1,6 +1,26 @@
 
 # Firmware update file encryption for embedded devices using modern cryptographic best practices: key generation, encryption, signing, and verification using OpenSSL 3+ libssl and libcrypto.
 
+The fast-fwsign utility was developed to meet critical security requirements for firmware integrity, confidentiality, and authentication. It ensures that firmware is protected against unauthorized modifications by using ECDSA for digital signatures, which verifies the authenticity and integrity of the firmware. To maintain confidentiality and prevent unauthorized access or reverse engineering, the utility employs ChaCha20-Poly1305 for encrypting firmware, safeguarding it from eavesdropping and tampering during distribution. The private keys used for signing are securely stored by encrypting them with a password using AES-256-CBC, mitigating the risk of key compromise. These measures collectively protect firmware at rest, in transit, and during deployment, ensuring that only trusted firmware can be installed and executed on devices from authenticated sources with cryptographic attestation, thus preventing malicious code execution and maintaining system security. It uses separate keys for encryption and decryption to ensure that even if the device is compromised the firmware image generation system won't be.
+
+By a funny coincidence I found myself explaining the requirements for encrypting and signing firmware updates for the third time in two weeks on separate projects (including an audit report on Friday), and I realized that I can probably code up the source code to do the required functions as quickly as i can explain all the requirements. (In reality it took a few hours longer to debug and fully test it, but I had already gone down that path already...) I recently was looking at similar cryptographic problems for some other work I was doing on Linux WireGuard VPNs so these processes were fresh in mind, so I took advantage of that to code up what is needed for secure firmware updates in an easy to deploy utility for public use.
+
+In any case, this is a question I find myself repeatedly answering on device audits, and explaining how you need separate keys for encrypting the firmware and signature verification to ensure that if a device is compromised the attacker can't use the keys stored on the unit to create firmware for other similar devices. We then get into a discussion of private and public keys and Diffie-Helman key exchanges and other more technical crypto topics. The other point of concern is handling the encryption keys and having another layer of security on the keys at rest to further limit compromise in an incident.
+
+So to that end, to save everyone time and simplify that explanation, I wrote a utility that leverages the OpenSSL cryptography libraries - to avoid roll your own crypto, which leverage the widely audited and verified cryptography implementations in its libcrypto libraries - that implements modern cryptographic best practices for firmware distribution and installation verification.
+
+This is a BSD licensed (to allow use in commercial products) utility written in C to perform the functions needed using current cryptographic algorithm choices suitable for smaller embedded device CPU SoC's, as well as a version of the utility/code that processes the encryption and decryption in smaller data chunks allowing devices to process image files much bigger than their potentially limited available memory at this source code repository. You'll find more documentation about what this code does and why below. I have done a fair bit of testing and trust the implementation because it leverages the well tested OpenSSL code, but by all means I encourage folks to get this audited by others, because while I  am pretty familiar with this topic, I am merely human and better verification and auditing is just good engineering. 
+
+So I've done most of the heavy cryptography lifting for building a secure firmware update system for you here, BUT THIS IS NOT COMPLETE.
+Left as tasks for the implementor are three other aspects of firmware updates that need to be covered:
+
+1. Logging and monitoring of firmware updates. To provide an audit trail in case of security incidents.
+2. Version numbering and anti-rollback mechanisms, so an attacker can't re-install an old vulnerable version of firmware.
+3. Provision of backup keys and a means of invalidating the main key in case of a signing key compromise.
+
+You can use this cryptographic core utility I have provided to achieve all of the above, but it will require other device specific logic that is beyond the scope of this utility.
+Please use this code as you see best fit.
+
 ## **Compilation and Usage Instructions for `fast-fwsign`**
 
 ### **Compilation Instructions**
