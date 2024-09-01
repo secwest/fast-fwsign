@@ -4,131 +4,131 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
 ### **Compilation Instructions**
 
-### **Install OpenSSL Development Libraries**: Ensure that the OpenSSL development libraries are installed on your system. This is required for compiling programs that use OpenSSL functions. You can install them using the package manager for your operating system:
+ **Install OpenSSL Development Libraries**: Ensure that the OpenSSL development libraries are installed on your system. This is required for compiling programs that use OpenSSL functions. You can install them using the package manager for your operating system:
 
-### **For Debian/Ubuntu**:  `sudo apt-get update`
+ **For Debian/Ubuntu**:  `sudo apt-get update`
 
-### `sudo apt-get install libssl-dev`
+ `sudo apt-get install libssl-dev`
 
-### **For Red Hat/CentOS**:  `sudo yum install openssl-devel`
+ **For Red Hat/CentOS**:  `sudo yum install openssl-devel`
 
-### **For macOS** (using Homebrew):  `brew install openssl`
+ **For macOS** (using Homebrew):  `brew install openssl`
 
-### **For Windows**: You might need to use a package manager like `vcpkg` or download OpenSSL binaries and include the appropriate paths in your compilation command.
+ **For Windows**: You might need to use a package manager like `vcpkg` or download OpenSSL binaries and include the appropriate paths in your compilation command.
 
-### **Compile the Code**: Assuming you have saved the provided code in a file named `fast-fwsign.c`, compile the code using `gcc` with the OpenSSL library:  `gcc -o fast-fwsign fast-fwsign.c -lssl -lcrypto`
+ **Compile the Code**: Assuming you have saved the provided code in a file named `fast-fwsign.c`, compile the code using `gcc` with the OpenSSL library:  `gcc -o fast-fwsign fast-fwsign.c -lssl -lcrypto`
 
-### The `-o fast-fwsign` flag specifies the output executable file name.
+ The `-o fast-fwsign` flag specifies the output executable file name.
 
-### The `-lssl -lcrypto` flags link the OpenSSL libraries required by the code.
+ The `-lssl -lcrypto` flags link the OpenSSL libraries required by the code.
 
-### **Ensure the Compilation was Successful**:
+ **Ensure the Compilation was Successful**:
 
-###  After running the compilation command, you should see a new executable named `fast-fwsign` in your current directory. Run the executable without arguments to check the usage message:  `./fast-fwsign`
+  After running the compilation command, you should see a new executable named `fast-fwsign` in your current directory. Run the executable without arguments to check the usage message:  `./fast-fwsign`
 
-### If the utility runs and displays a usage message, the compilation was successful.
+ If the utility runs and displays a usage message, the compilation was successful.
 
-### **Usage Instructions**
+ **Usage Instructions**
 
-### The `fast-fwsign` utility supports three main operations: generating ECDSA key pairs, encrypting a file, and decrypting a file.
+ The `fast-fwsign` utility supports three main operations: generating ECDSA key pairs, encrypting a file, and decrypting a file.
 
-#### **1\. Generating ECDSA Key Pairs**
+ **1\. Generating ECDSA Key Pairs**
 
-### To generate a pair of ECDSA keys (private and public), use the `keygen` command:
+ To generate a pair of ECDSA keys (private and public), use the `keygen` command:
 
-### `./fast-fwsign keygen <private_key_file> <public_key_file> <password>`
+ `./fast-fwsign keygen <private_key_file> <public_key_file> <password>`
 
-### 
+ 
 
-* ### `<private_key_file>`: Path to save the generated private key file (e.g., `priv.key`).
+*  `<private_key_file>`: Path to save the generated private key file (e.g., `priv.key`).
 
-* ### `<public_key_file>`: Path to save the generated public key file (e.g., `pub.key`).
+*  `<public_key_file>`: Path to save the generated public key file (e.g., `pub.key`).
 
-* ### `<password>`: Password to encrypt the private key.
+*  `<password>`: Password to encrypt the private key.
 
-### **Example**:
+ **Example**:
 
-### `./fast-fwsign keygen priv.key pub.key mypassword`
+ `./fast-fwsign keygen priv.key pub.key mypassword`
 
-### 
+ 
 
-### This command generates a private key encrypted with the password `mypassword` and a corresponding public key.
+ This command generates a private key encrypted with the password `mypassword` and a corresponding public key.
 
-#### **2\. Encrypting a File**
+ **2\. Encrypting a File**
 
-### To encrypt a file using ChaCha20-Poly1305 and sign it using ECDSA, use the `encrypt` command:
+ To encrypt a file using ChaCha20-Poly1305 and sign it using ECDSA, use the `encrypt` command:
 
-### `./fast-fwsign encrypt <input_file> <output_file> <private_key_file> <receiver_pubkey_file> <password>`
+ `./fast-fwsign encrypt <input_file> <output_file> <private_key_file> <receiver_pubkey_file> <password>`
 
-### 
+ 
 
-* ### `<input_file>`: Path to the file you want to encrypt (e.g., `firmware.bin`).
+*  `<input_file>`: Path to the file you want to encrypt (e.g., `firmware.bin`).
 
-* ### `<output_file>`: Path to save the encrypted output file (e.g., `firmware.crypt`).
+*  `<output_file>`: Path to save the encrypted output file (e.g., `firmware.crypt`).
 
-* ### `<private_key_file>`: Sender’s private key file for deriving the shared secret and signing the data.
+*  `<private_key_file>`: Sender’s private key file for deriving the shared secret and signing the data.
 
-* ### `<receiver_pubkey_file>`: Receiver’s public key file for deriving the shared secret.
+*  `<receiver_pubkey_file>`: Receiver’s public key file for deriving the shared secret.
 
-* ### `<password>`: Password to decrypt the sender’s private key.
+*  `<password>`: Password to decrypt the sender’s private key.
 
-### **Example**:
+ **Example**:
 
-### `./fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword`
+ `./fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword`
 
-### 
+ 
 
-### This command encrypts `firmware.bin`, signs it, and saves the result in `firmware.crypt`.
+ This command encrypts `firmware.bin`, signs it, and saves the result in `firmware.crypt`.
 
-#### **3\. Decrypting a File**
+ **3\. Decrypting a File**
 
-### To decrypt a file and verify its signature, use the `decrypt` command:
+ To decrypt a file and verify its signature, use the `decrypt` command:
 
-### `./fast-fwsign decrypt <input_file> <output_file> <private_key_file> <sender_pubkey_file> <password>`
+ `./fast-fwsign decrypt <input_file> <output_file> <private_key_file> <sender_pubkey_file> <password>`
 
-### 
+ 
 
-* ### `<input_file>`: Path to the file you want to decrypt (e.g., `firmware.crypt`).
+*  `<input_file>`: Path to the file you want to decrypt (e.g., `firmware.crypt`).
 
-* ### `<output_file>`: Path to save the decrypted output file (e.g., `firmware.dec`).
+*  `<output_file>`: Path to save the decrypted output file (e.g., `firmware.dec`).
 
-* ### `<private_key_file>`: Receiver’s private key file for deriving the shared secret.
+*  `<private_key_file>`: Receiver’s private key file for deriving the shared secret.
 
-* ### `<sender_pubkey_file>`: Sender’s public key file for verifying the signature.
+*  `<sender_pubkey_file>`: Sender’s public key file for verifying the signature.
 
-* ### `<password>`: Password to decrypt the receiver’s private key.
+*  `<password>`: Password to decrypt the receiver’s private key.
 
-### **Example**:
+ **Example**:
 
-### `./fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender_pub.key mypassword`
+ `./fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender_pub.key mypassword`
 
-### 
+ 
 
-### This command decrypts `firmware.crypt`, verifies the signature using the sender's public key, and saves the result in `firmware.dec`.
+ This command decrypts `firmware.crypt`, verifies the signature using the sender's public key, and saves the result in `firmware.dec`.
 
-### **Notes and Best Practices**
+ **Notes and Best Practices**
 
-* ### **Key Management**: Keep your private keys secure and use strong, unique passwords. Compromise of a private key would allow an attacker to decrypt data and impersonate the key owner.
+*  **Key Management**: Keep your private keys secure and use strong, unique passwords. Compromise of a private key would allow an attacker to decrypt data and impersonate the key owner.
 
-* ### **Nonces**: Each encryption operation uses a new, random nonce. Do not reuse nonces with the same key, as this can compromise the security of ChaCha20-Poly1305.
+*  **Nonces**: Each encryption operation uses a new, random nonce. Do not reuse nonces with the same key, as this can compromise the security of ChaCha20-Poly1305.
 
-* ### **Error Handling**: The utility will print detailed error messages and exit if any operation fails. These messages can help diagnose issues such as incorrect file paths, mismatched keys, or incorrect passwords.
+*  **Error Handling**: The utility will print detailed error messages and exit if any operation fails. These messages can help diagnose issues such as incorrect file paths, mismatched keys, or incorrect passwords.
 
-* ### **Signature Verification**: Always verify the signature after decryption to ensure the authenticity and integrity of the data.
+*  **Signature Verification**: Always verify the signature after decryption to ensure the authenticity and integrity of the data.
 
-### **Example Workflow**
+ **Example Workflow**
 
-### Generate key pairs for both the sender and receiver:  `./fast-fwsign keygen sender_priv.key sender_pub.key senderpass`
+ Generate key pairs for both the sender and receiver:  `./fast-fwsign keygen sender_priv.key sender_pub.key senderpass`
 
-### `./fast-fwsign keygen receiver_priv.key receiver_pub.key receiverpass`
+ `./fast-fwsign keygen receiver_priv.key receiver_pub.key receiverpass`
 
-### Encrypt the firmware file: `./fast-fwsign encrypt firmware.bin firmware.crypt sender_priv.key receiver_pub.key senderpass`
+ Encrypt the firmware file: `./fast-fwsign encrypt firmware.bin firmware.crypt sender_priv.key receiver_pub.key senderpass`
 
-### Decrypt and verify the firmware file:  `./fast-fwsign decrypt firmware.crypt firmware.dec receiver_priv.key sender_pub.key receiverpass`
+ Decrypt and verify the firmware file:  `./fast-fwsign decrypt firmware.crypt firmware.dec receiver_priv.key sender_pub.key receiverpass`
 
-### By following these instructions, you can securely encrypt and sign firmware files, ensuring their integrity and authenticity during distribution and deployment.
+ By following these instructions, you can securely encrypt and sign firmware files, ensuring their integrity and authenticity during distribution and deployment.
 
-###  
+  
 
 ###    **Firmware Encryption and Signing Utility \- Cryptography Description**
 
