@@ -39,7 +39,6 @@
  * To compile this utility, ensure that the OpenSSL development libraries are installed.
  *
  * For Debian/Ubuntu:
- *     sudo apt-get update
  *     sudo apt-get install libssl-dev
  *
  * For Red Hat/CentOS:
