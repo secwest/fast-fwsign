@@ -1,3 +1,94 @@
+/*
+ * FAST-FWSIGN-SIMPLE   Firmware image encryption, signing and verification for embedded systems.
+ *
+ * BSD 3-Clause License
+ * 
+ * Copyright (c) 2024, Dragos Ruiu, Dragostech.com Inc.
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, 
+ *    this list of conditions, and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice, 
+ *    this list of conditions, and the following disclaimer in the documentation 
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of Dragos Ruiu, Dragostech.com Inc. nor the names of its 
+ *    contributors may be used to endorse or promote products derived from this 
+ *    software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE 
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*
+ * fast-fwsign: A utility for generating ECDSA keys, encrypting, and decrypting files
+ * with ChaCha20-Poly1305 and ECDSA signatures.
+ *
+ * Compilation Instructions:
+ * -------------------------
+ * To compile this utility, ensure that the OpenSSL development libraries are installed.
+ *
+ * For Debian/Ubuntu:
+ *     sudo apt-get update
+ *     sudo apt-get install libssl-dev
+ *
+ * For Red Hat/CentOS:
+ *     sudo yum install openssl-devel
+ *
+ * For macOS (using Homebrew):
+ *     brew install openssl
+ *
+ * For Windows: Use a package manager like vcpkg or download OpenSSL binaries and configure the paths.
+ *
+ * Compile the code using gcc:
+ *     gcc -o fast-fwsign fast-fwsign.c -lssl -lcrypto
+ *
+ * Usage:
+ * ------
+ * The `fast-fwsign` utility supports three main commands: key generation, encryption, and decryption.
+ *
+ * 1. Key Generation:
+ *    Generate a pair of ECDSA keys (private and public).
+ *    Command:
+ *        ./fast-fwsign keygen <private_key_file> <public_key_file> <password>
+ *
+ *    Example:
+ *        ./fast-fwsign keygen priv.key pub.key mypassword
+ *
+ * 2. Encryption:
+ *    Encrypt a file using ChaCha20-Poly1305 and sign it using ECDSA.
+ *    Command:
+ *        ./fast-fwsign encrypt <input_file> <output_file> <private_key_file> <receiver_pubkey_file> <password>
+ *
+ *    Example:
+ *        ./fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword
+ *
+ * 3. Decryption:
+ *    Decrypt a file and verify its signature using ECDSA.
+ *    Command:
+ *        ./fast-fwsign decrypt <input_file> <output_file> <private_key_file> <sender_pubkey_file> <password>
+ *
+ *    Example:
+ *        ./fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender_pub.key mypassword
+ *
+ * Notes:
+ * ------
+ * - Ensure private keys are stored securely and use strong, unique passwords.
+ * - Each encryption operation uses a random nonce to ensure unique ciphertexts.
+ * - Verify signatures after decryption to maintain data integrity and authenticity.
+ */
+
+
 #include <openssl/evp.h>
 #include <openssl/ec.h>
 #include <openssl/pem.h>
