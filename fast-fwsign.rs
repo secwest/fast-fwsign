@@ -88,15 +88,16 @@ use std::io::{self, Read, Write, Seek, SeekFrom};
 use std::process::exit;
 use std::env;
 
-const CHUNK_SIZE: usize = 32768;
-const NONCE_SIZE: usize = 12;
+const CHUNK_SIZE: usize = 32768; // Define a larger chunk size (32k) for processing
+const NONCE_SIZE: usize = 12;    // Nonce size for ChaCha20-Poly1305
 
-
+// Error handling function
 fn handle_errors(message: &str) {
     eprintln!("Error: {}", message);
     exit(1);
 }
 
+// Print buffer content in hex for debugging
 fn print_buffer_hex(label: &str, buf: &[u8]) {
     print!("{}: ", label);
     for byte in buf {
@@ -105,16 +106,25 @@ fn print_buffer_hex(label: &str, buf: &[u8]) {
     println!();
 }
 
+// Function to generate ECDSA keys and save to files
 fn keygen(private_key_file: &str, public_key_file: &str, password: &str) -> Result<(), io::Error> {
+    // ECDSA (Elliptic Curve Digital Signature Algorithm):
+    // Purpose: Provides digital signatures for verifying data integrity and authenticity.
+    // Reason for Selection: ECDSA offers a high level of security with shorter key sizes compared to traditional algorithms like RSA.
+    // Security: ECDSA is resistant to attacks that exploit key size. A 256-bit ECDSA key offers comparable security to a 3072-bit RSA key.
+
     let group = EcGroup::from_curve_name(openssl::nid::Nid::X9_62_PRIME256V1).unwrap();
     let key = EcKey::generate(&group).unwrap();
 
-    // Save the private key with password protection
+    // Save private key with password protection using AES-256-CBC
+    // AES-256-CBC:
+    // Purpose: Used for encrypting private keys with a password.
+    // Security: AES-256 provides robust protection against brute-force attacks due to its large key size.
     let private_key_pem = key.private_key_to_pem_passphrase(openssl::symm::Cipher::aes_256_cbc(), password.as_bytes()).unwrap();
     let mut priv_file = File::create(private_key_file)?;
     priv_file.write_all(&private_key_pem)?;
 
-    // Save the public key
+    // Save public key
     let public_key_pem = key.public_key_to_pem().unwrap();
     let mut pub_file = File::create(public_key_file)?;
     pub_file.write_all(&public_key_pem)?;
@@ -123,13 +133,20 @@ fn keygen(private_key_file: &str, public_key_file: &str, password: &str) -> Resu
     Ok(())
 }
 
+// Function to encrypt a file using ChaCha20-Poly1305 and ECDH
 fn encrypt_file(input_file: &str, output_file: &str, private_key_file: &str, receiver_pubkey_file: &str, password: &str) -> Result<(), io::Error> {
+    // Load sender's private key
     let priv_key = EcKey::private_key_from_pem_passphrase(&std::fs::read(private_key_file)?, password.as_bytes()).unwrap();
     let receiver_pub_key = EcKey::public_key_from_pem(&std::fs::read(receiver_pubkey_file)?).unwrap();
 
     let sender_pkey = PKey::from_ec_key(priv_key).unwrap();
     let receiver_pkey = PKey::from_ec_key(receiver_pub_key).unwrap();
 
+    // Derive shared secret using ECDH (Elliptic Curve Diffie-Hellman)
+    // ECDH (Elliptic Curve Diffie-Hellman):
+    // Purpose: Used for key exchange to securely derive a shared secret between parties.
+    // Reason for Selection: ECDH provides secure key exchange based on elliptic curves, enabling the establishment of a shared secret key without direct transmission.
+    // Security: ECDH offers strong security against eavesdropping and man-in-the-middle attacks.
     let mut derive_ctx = openssl::derive::Deriver::new(&sender_pkey).unwrap();
     derive_ctx.set_peer(&receiver_pkey).unwrap();
     let shared_secret = derive_ctx.derive_to_vec().unwrap();
@@ -137,6 +154,11 @@ fn encrypt_file(input_file: &str, output_file: &str, private_key_file: &str, rec
     println!("Shared secret derived successfully.");
     print_buffer_hex("Shared secret", &shared_secret);
 
+    // Generate random nonce for ChaCha20-Poly1305 encryption
+    // ChaCha20-Poly1305:
+    // Purpose: Provides authenticated encryption (confidentiality and integrity).
+    // Reason for Selection: ChaCha20-Poly1305 is a modern, high-performance authenticated encryption algorithm.
+    // Security: ChaCha20-Poly1305 is secure against a wide range of cryptographic attacks, including differential cryptanalysis and side-channel attacks.
     let mut nonce = [0u8; NONCE_SIZE];
     rand_bytes(&mut nonce).unwrap();
 
@@ -150,9 +172,11 @@ fn encrypt_file(input_file: &str, output_file: &str, private_key_file: &str, rec
     let cipher = Cipher::chacha20_poly1305();
     let mut chunk = vec![0u8; CHUNK_SIZE];
 
+    // Initialize signing context for ECDSA signature
     let mut md_ctx = Signer::new(openssl::hash::MessageDigest::sha256(), &sender_pkey).unwrap();
     let mut total_read = 0;
 
+    // Process the input file in chunks
     loop {
         let len = in_file.read(&mut chunk)?;
         if len == 0 { break; }
@@ -162,12 +186,13 @@ fn encrypt_file(input_file: &str, output_file: &str, private_key_file: &str, rec
         out_file.write_all(&ciphertext)?;
 
         md_ctx.update(&ciphertext).unwrap();
-        print!(".");
+        print!("."); // Print a period for each block processed
         io::stdout().flush().unwrap();
     }
 
     println!("\nEncryption completed successfully. Total bytes read: {}", total_read);
 
+    // Generate and append the ECDSA signature to the output file
     let signature = md_ctx.sign_to_vec().unwrap();
     println!("Generated signature:");
     print_buffer_hex("Generated signature", &signature);
@@ -179,13 +204,16 @@ fn encrypt_file(input_file: &str, output_file: &str, private_key_file: &str, rec
     Ok(())
 }
 
+// Function to decrypt a file using ChaCha20-Poly1305 and ECDH
 fn decrypt_file(input_file: &str, output_file: &str, private_key_file: &str, sender_pubkey_file: &str, password: &str) -> Result<(), io::Error> {
+    // Load receiver's private key
     let priv_key = EcKey::private_key_from_pem_passphrase(&std::fs::read(private_key_file)?, password.as_bytes()).unwrap();
     let sender_pub_key = EcKey::public_key_from_pem(&std::fs::read(sender_pubkey_file)?).unwrap();
 
     let receiver_pkey = PKey::from_ec_key(priv_key).unwrap();
     let sender_pkey = PKey::from_ec_key(sender_pub_key).unwrap();
 
+    // Derive shared secret using ECDH
     let mut derive_ctx = openssl::derive::Deriver::new(&receiver_pkey).unwrap();
     derive_ctx.set_peer(&sender_pkey).unwrap();
     let shared_secret = derive_ctx.derive_to_vec().unwrap();
@@ -193,15 +221,18 @@ fn decrypt_file(input_file: &str, output_file: &str, private_key_file: &str, sen
     println!("Shared secret derived successfully.");
     print_buffer_hex("Shared secret", &shared_secret);
 
+    // Open input and output files
     let mut in_file = File::open(input_file)?;
     let mut out_file = File::create(output_file)?;
 
+    // Read nonce from input file
     let mut nonce = [0u8; NONCE_SIZE];
     in_file.read_exact(&mut nonce)?;
 
     println!("Nonce read:");
     print_buffer_hex("Nonce", &nonce);
 
+    // Get file size and calculate signature length
     let file_size = in_file.seek(SeekFrom::End(0))?;
     let sig_len_offset = file_size - 4;
     in_file.seek(SeekFrom::Start(sig_len_offset))?;
@@ -227,9 +258,11 @@ fn decrypt_file(input_file: &str, output_file: &str, private_key_file: &str, sen
     let cipher = Cipher::chacha20_poly1305();
     let mut chunk = vec![0u8; CHUNK_SIZE];
 
+    // Initialize verification context for ECDSA signature
     let mut md_ctx = Verifier::new(openssl::hash::MessageDigest::sha256(), &sender_pkey).unwrap();
     let mut total_read = 0;
 
+    // Process the input file in chunks
     loop {
         let len = in_file.read(&mut chunk)?;
         if len == 0 { break; }
@@ -247,12 +280,13 @@ fn decrypt_file(input_file: &str, output_file: &str, private_key_file: &str, sen
             break;
         }
 
-        print!(".");
+        print!("."); // Print a period for each block processed
         io::stdout().flush().unwrap();
     }
 
     println!("\nDecryption completed successfully. Total bytes processed: {}", total_read);
 
+    // Verify the signature
     println!("Verifying signature against the computed hash...");
     if md_ctx.verify(&signature).is_err() {
         eprintln!("Failed to verify signature.");
@@ -264,6 +298,7 @@ fn decrypt_file(input_file: &str, output_file: &str, private_key_file: &str, sen
     Ok(())
 }
 
+// Main function to handle command-line arguments
 fn main() {
     let args: Vec<String> = env::args().collect();
 
