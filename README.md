@@ -17,11 +17,15 @@
 
  **For Windows**: You might need to use a package manager like `vcpkg` or download OpenSSL binaries and include the appropriate paths in your compilation command.
 
+
+
  **Compile the Code**: Assuming you have saved the provided code in a file named `fast-fwsign.c`, compile the code using `gcc` with the OpenSSL library:  `gcc -o fast-fwsign fast-fwsign.c -lssl -lcrypto`
 
  The `-o fast-fwsign` flag specifies the output executable file name.
 
  The `-lssl -lcrypto` flags link the OpenSSL libraries required by the code.
+
+
 
  **Ensure the Compilation was Successful**:
 
@@ -29,17 +33,19 @@
 
  If the utility runs and displays a usage message, the compilation was successful.
 
+
+
+
  ### **Usage Instructions**
 
  The `fast-fwsign` utility supports three main operations: generating ECDSA key pairs, encrypting a file, and decrypting a file.
+
 
  #### **1\. Generating ECDSA Key Pairs**
 
  To generate a pair of ECDSA keys (private and public), use the `keygen` command:
 
  `./fast-fwsign keygen <private_key_file> <public_key_file> <password>`
-
- 
 
 *  `<private_key_file>`: Path to save the generated private key file (e.g., `priv.key`).
 
@@ -51,18 +57,15 @@
 
  `./fast-fwsign keygen priv.key pub.key mypassword`
 
- 
-
  This command generates a private key encrypted with the password `mypassword` and a corresponding public key.
 
+ 
  #### **2\. Encrypting a File**
 
  To encrypt a file using ChaCha20-Poly1305 and sign it using ECDSA, use the `encrypt` command:
 
  `./fast-fwsign encrypt <input_file> <output_file> <private_key_file> <receiver_pubkey_file> <password>`
-
  
-
 *  `<input_file>`: Path to the file you want to encrypt (e.g., `firmware.bin`).
 
 *  `<output_file>`: Path to save the encrypted output file (e.g., `firmware.crypt`).
@@ -77,18 +80,15 @@
 
  `./fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword`
 
- 
-
  This command encrypts `firmware.bin`, signs it, and saves the result in `firmware.crypt`.
 
+ 
  #### **3\. Decrypting a File**
 
  To decrypt a file and verify its signature, use the `decrypt` command:
 
  `./fast-fwsign decrypt <input_file> <output_file> <private_key_file> <sender_pubkey_file> <password>`
-
  
-
 *  `<input_file>`: Path to the file you want to decrypt (e.g., `firmware.crypt`).
 
 *  `<output_file>`: Path to save the decrypted output file (e.g., `firmware.dec`).
@@ -103,10 +103,10 @@
 
  `./fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender_pub.key mypassword`
 
- 
-
  This command decrypts `firmware.crypt`, verifies the signature using the sender's public key, and saves the result in `firmware.dec`.
 
+ 
+ 
  ### **Notes and Best Practices**
 
 *  **Key Management**: Keep your private keys secure and use strong, unique passwords. Compromise of a private key would allow an attacker to decrypt data and impersonate the key owner.
@@ -181,6 +181,9 @@
 * **Authentication**: ECDSA signatures verify the sender’s identity and the integrity of the data, ensuring that the message has not been altered since it was signed.  
 * **Efficiency**: Using ECC (ECDH and ECDSA) allows for strong security with reduced computational overhead compared to RSA or other non-ECC methods. ChaCha20-Poly1305 is designed to be efficient and fast, especially in software implementations.
 
+
+
+
 # **Chunked Algorithm Version**
 
 The chunked version of this utility allows processing files larger than main memory on limited resource systems. Provided code encrypts the input file using the ChaCha20-Poly1305 algorithm in blocks and calculates the signature over the entire file using ECDSA. Here's how the process works step-by-step for both encryption and signature calculation, ensuring that both operations are correctly handled even when the file is processed in chunks:
@@ -239,7 +242,7 @@ The chunked version of this utility allows processing files larger than main mem
 
 
 
-  #### **How Password Cryptography Works in `fast-fwsign`**
+# **How Key Password Cryptography Works in `fast-fwsign`**
 
 1. **Private Key Encryption with Password**:  
    * When generating ECDSA key pairs using the `keygen` command, the private key is encrypted with a password before being saved to a file.  
@@ -247,7 +250,7 @@ The chunked version of this utility allows processing files larger than main mem
    * **Process**:  
      * The key generation function first creates an elliptic curve key pair.  
      * The private key, before being saved to a file, is encrypted using the provided password.  
-     * During encryption, a random salt and an initialization vector (IV) are generated. These values are used along with the password in a key derivation function (KDF), typically PBKDF2, to derive a strong encryption key.  
+     * During encryption, a random salt and an initialization vector (IV) are generated. These values are used along with the password in a key derivation function (KDF), typically PBKDF2 the default in OpenSSL, to derive a strong encryption key.  
      * AES-256-CBC is then used with this derived key to encrypt the private key, ensuring that only someone with the correct password can decrypt and use the private key.  
 2. **Decryption of Private Key**:  
    * During operations like encryption and decryption of data files, the private key needs to be read and used. Since the private key is stored in an encrypted form, it must first be decrypted.  
@@ -265,7 +268,7 @@ The chunked version of this utility allows processing files larger than main mem
  **Compliance with Security Standards**:  
    * Encrypting private keys at rest is recommended by various security standards and best practices, such as PCI-DSS and NIST guidelines. It helps prevent unauthorized access and ensures compliance with regulatory requirements, which often mandate that sensitive data be protected.  
  **Mitigation of Key Extraction Attacks**:  
-   * Even if attackers obtain the encrypted private key file, they must still crack the password to access the key. A strong password and a properly implemented KDF make this task computationally intensive and impractical for attackers.  
+   * Even if attackers obtain the encrypted private key file, they must still crack the password, or extract the separately stored password to access the key. 
    * Using a salt and multiple iterations in the KDF process helps protect against brute-force and dictionary attacks, ensuring that even if an attacker has powerful resources, the process remains secure.  
  **Maintaining Data Integrity and Authenticity**:  
    * Encrypting private keys with passwords ensures that only authorized individuals can decrypt, sign, or use them, preserving the integrity and authenticity of the data.  
@@ -274,7 +277,7 @@ The chunked version of this utility allows processing files larger than main mem
    * Password-based encryption provides a convenient way for users to protect their keys while maintaining ease of use. It allows users to protect their keys with passwords they know, while benefiting from strong cryptographic protection.  
    * Implementing policies for password complexity and rotation can further enhance security over time.
 
-   ### **Why AES-256-CBC is Acceptable in This Use Case**
+## **Why AES-256-CBC is Acceptable in This Use Case**
 
  **AES-256-CBC Overview**:  
    * **AES (Advanced Encryption Standard)**: AES is a widely accepted and trusted encryption standard. AES-256 refers to using a 256-bit key, providing a high level of security.  
