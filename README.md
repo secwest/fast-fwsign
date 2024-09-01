@@ -153,7 +153,9 @@ So I've done most of the heavy cryptography lifting for building a secure firmwa
 Left as tasks for the implementor are three other aspects of firmware updates that need to be covered:
 
 **1. Logging and monitoring of firmware updates. To provide an audit trail in case of security incidents.**
+
 **2. Version numbering and anti-rollback mechanisms, so an attacker can't re-install an old vulnerable version of firmware.**
+
 **3. Provision of backup keys and a means of invalidating the main key in case of a signing key compromise.**
 
 You can use this cryptographic core utility I have provided to achieve all of the above, but it will require other device specific logic that is beyond the scope of this utility.
