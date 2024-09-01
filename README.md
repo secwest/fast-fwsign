@@ -1,5 +1,5 @@
 
-# Firmware key generation , signing and verification using OpenSSL 3+ libssl and libcrypto.
+# Firmware file encryption using modern cryptographic best practices: key generation, encryption, signing, and verification using OpenSSL 3+ libssl and libcrypto.
 
 ## **Compilation and Usage Instructions for `fast-fwsign`**
 
