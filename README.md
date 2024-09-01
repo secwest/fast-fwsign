@@ -1,4 +1,5 @@
-Firmware key generation , signing and verification using OpenSSL 3+ libssl and libcrypto.
+
+# Firmware key generation , signing and verification using OpenSSL 3+ libssl and libcrypto.
 
 ## **Compilation and Usage Instructions for `fast-fwsign`**
 
@@ -136,7 +137,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 
   
 
-###    **Firmware Encryption and Signing Utility \- Cryptography Description**
+##    **Firmware Encryption and Signing Utility \- Cryptography Description**
 
 1. **Elliptic Curve Cryptography (ECC)**:  
    * **Elliptic Curve Diffie-Hellman (ECDH) for Key Exchange**:  
@@ -180,7 +181,7 @@ Firmware key generation , signing and verification using OpenSSL 3+ libssl and l
 * **Authentication**: ECDSA signatures verify the sender’s identity and the integrity of the data, ensuring that the message has not been altered since it was signed.  
 * **Efficiency**: Using ECC (ECDH and ECDSA) allows for strong security with reduced computational overhead compared to RSA or other non-ECC methods. ChaCha20-Poly1305 is designed to be efficient and fast, especially in software implementations.
 
-**Chunked Algorithm Version**
+# **Chunked Algorithm Version**
 
 The chunked version of this utility allows processing files larger than main memory on limited resource systems. Provided code encrypts the input file using the ChaCha20-Poly1305 algorithm in blocks and calculates the signature over the entire file using ECDSA. Here's how the process works step-by-step for both encryption and signature calculation, ensuring that both operations are correctly handled even when the file is processed in chunks:
 
