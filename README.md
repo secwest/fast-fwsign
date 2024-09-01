@@ -236,3 +236,56 @@ The chunked version of this utility allows processing files larger than main mem
 * **Signature Over Entire File:** The signature calculation accumulates the hash over all chunks, ensuring that any change in any part of the file would be detected. This integrity check protects against tampering.  
 * **Nonce for Uniqueness:** The nonce ensures that even if the same plaintext is encrypted multiple times with the same key, the ciphertext will be different each time, providing semantic security.
 
+
+
+
+  #### **How Password Cryptography Works in `fast-fwsign`**
+
+1. **Private Key Encryption with Password**:  
+   * When generating ECDSA key pairs using the `keygen` command, the private key is encrypted with a password before being saved to a file.  
+   * **Encryption Mechanism**: The private key is encrypted using the AES-256-CBC (Advanced Encryption Standard in Cipher Block Chaining mode) algorithm. The encryption is performed using the password provided by the user.  
+   * **Process**:  
+     * The key generation function first creates an elliptic curve key pair.  
+     * The private key, before being saved to a file, is encrypted using the provided password.  
+     * During encryption, a random salt and an initialization vector (IV) are generated. These values are used along with the password in a key derivation function (KDF), typically PBKDF2, to derive a strong encryption key.  
+     * AES-256-CBC is then used with this derived key to encrypt the private key, ensuring that only someone with the correct password can decrypt and use the private key.  
+2. **Decryption of Private Key**:  
+   * During operations like encryption and decryption of data files, the private key needs to be read and used. Since the private key is stored in an encrypted form, it must first be decrypted.  
+   * **Process**:  
+     * The user provides the password, which is used in conjunction with the salt to derive the same encryption key that was used for encryption.  
+     * The derived key, along with the stored IV, is used with AES-256-CBC to decrypt the private key file, making the private key available for cryptographic operations (e.g., signing, deriving shared secrets).
+
+     
+
+# **Why Encrypt Private Keys at Rest?**
+
+1. **Protection Against Unauthorized Access**:  
+   * **Threat Model**: Private key files might be accessible to attackers who gain unauthorized access to the file system. Without encryption, these keys could be directly misused to decrypt data, impersonate the key owner, or sign malicious information.  
+   * **Password Protection**: By encrypting the private key with a password, unauthorized users cannot easily access or misuse the key, even if they manage to obtain the encrypted file.  
+2. **Compliance with Security Standards**:  
+   * Encrypting private keys at rest is recommended by various security standards and best practices, such as PCI-DSS and NIST guidelines. It helps prevent unauthorized access and ensures compliance with regulatory requirements, which often mandate that sensitive data be protected.  
+3. **Mitigation of Key Extraction Attacks**:  
+   * Even if attackers obtain the encrypted private key file, they must still crack the password to access the key. A strong password and a properly implemented KDF make this task computationally intensive and impractical for attackers.  
+   * Using a salt and multiple iterations in the KDF process helps protect against brute-force and dictionary attacks, ensuring that even if an attacker has powerful resources, the process remains secure.  
+4. **Maintaining Data Integrity and Authenticity**:  
+   * Encrypting private keys with passwords ensures that only authorized individuals can decrypt, sign, or use them, preserving the integrity and authenticity of the data.  
+   * This measure prevents unauthorized users from tampering with the data, as they would not have access to the necessary cryptographic keys.  
+5. **Usability and Security Balance**:  
+   * Password-based encryption provides a convenient way for users to protect their keys while maintaining ease of use. It allows users to protect their keys with passwords they know, while benefiting from strong cryptographic protection.  
+   * Implementing policies for password complexity and rotation can further enhance security over time.
+
+   #### **Why AES-256-CBC is Acceptable in This Use Case**
+
+1. **AES-256-CBC Overview**:  
+   * **AES (Advanced Encryption Standard)**: AES is a widely accepted and trusted encryption standard. AES-256 refers to using a 256-bit key, providing a high level of security.  
+   * **CBC (Cipher Block Chaining) Mode**: In CBC mode, each block of plaintext is XORed with the previous ciphertext block before being encrypted. An initialization vector (IV) is used to ensure that identical plaintext blocks do not result in identical ciphertext blocks.  
+2. **Security Concerns with CBC**:  
+   * CBC mode can be vulnerable to certain types of attacks, such as padding oracle attacks if not implemented correctly. These attacks exploit the predictable nature of padding bytes to decrypt messages without knowing the encryption key.  
+   * However, these vulnerabilities are typically associated with scenarios where the attacker can manipulate the ciphertext and observe the decryption errors, which is not the case here.  
+3. **Why CBC is Acceptable for Key Encryption**:  
+   * **Controlled Environment**: The private key file is stored in a controlled environment, and there is no exposure to external manipulation or decryption attempts that would enable padding oracle attacks.  
+   * **Single Encryption Operation**: The private key is encrypted once and stored securely. The file is not subject to multiple encryptions or modifications that could introduce vulnerabilities.  
+   * **Additional Protection Layers**: The use of a strong, randomly generated IV and a high-entropy password provides sufficient protection. The IV ensures that each encryption operation results in different ciphertext, even if the same key and plaintext are used. A securely derived key using PBKDF2 further reduces the risk of attacks.  
+   * **Simplicity and Compatibility**: AES-256-CBC is well-supported and widely implemented, making it a practical choice for encrypting private keys. It strikes a balance between security, simplicity, and performance, which is suitable for this use case.
+
+   
