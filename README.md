@@ -369,15 +369,10 @@ Open the `Cargo.toml` file in your preferred text editor and modify it to includ
 `[dependencies]`  
 `openssl = { version = "0.10", features = ["vendored"] }`
 
-### **Step 5: Write the Rust Code**
+### **Step 5: Copy the Rust Code**
 
 **Edit `src/main.rs`:**  
-Replace the contents of `src/main.rs` with the provided Rust code, including the updated version with comments and explanations.  
-To do this, open `src/main.rs` in your text editor and paste the full code you have. Here’s a brief reminder of how to edit:
-
-`nano src/main.rs`
-
-1. Or, use any other text editor of your choice.
+Replace the contents of `src/main.rs` with the provided Rust code.  
 
 ### **Step 6: Compile and Build the Project**
 
