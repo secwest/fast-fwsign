@@ -6,7 +6,7 @@
 The fast-fwsign utility was developed to meet critical security requirements for firmware update distribution integrity, confidentiality, and authentication. It ensures that firmware is protected against unauthorized modifications by using ECDSA for digital signatures, which verifies the authenticity and integrity of the firmware. To maintain confidentiality and prevent unauthorized access or reverse engineering, the utility employs ChaCha20-Poly1305 for encrypting firmware, safeguarding it from eavesdropping and tampering during distribution. The private keys used for signing are securely stored by encrypting them with a password using AES-256-CBC, mitigating some of the risk of key compromise. These measures collectively protect firmware at rest, in transit, and during deployment, ensuring that only trusted firmware can be installed and executed on devices from authenticated sources with cryptographic attestation, thus preventing malicious code execution and maintaining system security. It uses separate keys for encryption and decryption to ensure that even if the device is compromised the firmware image generation system won't be.
 
 
-## **Compilation and Usage Instructions for `fast-fwsign`**
+## **Compilation and Usage Instructions for `fast-fwsign` (C version)**
 
 ### **Compilation Instructions**
 
@@ -315,5 +315,108 @@ The chunked version of this utility allows processing files larger than main mem
    * **Single Encryption Operation**: The private key is encrypted once and stored securely. The file is not subject to multiple encryptions or modifications that could introduce vulnerabilities.  
    * **Additional Protection Layers**: The use of a strong, randomly generated IV and a high-entropy password provides sufficient protection. The IV ensures that each encryption operation results in different ciphertext, even if the same key and plaintext are used. A securely derived key using PBKDF2 further reduces the risk of attacks.  
    * **Simplicity and Compatibility**: AES-256-CBC is well-supported and widely implemented, making it a practical choice for encrypting private keys. It strikes a balance between security, simplicity, and performance, which is suitable for this use case.
+
+
+## **Compilation and Usage Instructions for `fast-fwsign` (Rust version)**
+
+### **Step 1: Install Rust and Cargo**
+
+If you haven't installed Rust and Cargo yet, you can do so using Rust's official installation script. Open a terminal and run the following command:
+
+`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+
+Follow the on-screen instructions to complete the installation. Once installed, you can verify by checking the Rust version:
+
+`rustc --version`
+
+### **Step 2: Install OpenSSL Development Libraries**
+
+Ensure OpenSSL development libraries are installed. This is necessary because the Rust program uses the OpenSSL crate. For Debian-based systems (like Ubuntu), you can install them using:
+
+`sudo apt-get install libssl-dev`
+
+For other operating systems, use the appropriate package manager to install OpenSSL development libraries.
+
+### **Step 3: Create a New Rust Project**
+
+**Create a Project Directory:**  
+First, choose a directory where you want to create your Rust project. Open a terminal in that directory and run:
+
+`mkdir fast-fwsign`  
+`cd fast-fwsign`
+
+1. This creates a directory named `fast-fwsign` and navigates into it.
+
+**Initialize a New Cargo Project:**  
+Inside the `fast-fwsign` directory, initialize a new Rust project using Cargo:
+
+`cargo init`
+
+2. This command will create a basic Rust project structure with the following files:  
+   * `Cargo.toml`: The configuration file for Rust's package manager (Cargo).  
+   * `src/main.rs`: The main source file for your Rust project.
+
+### **Step 4: Configure `Cargo.toml` File**
+
+Open the `Cargo.toml` file in your preferred text editor and modify it to include the required dependencies. Here’s how the `Cargo.toml` should look:
+
+`[package]`  
+`name = "fast-fwsign"`  
+`version = "0.1.0"`  
+`authors = ["Dragos Ruiu <dr@secwest.net>"]`  
+`edition = "2021"`
+
+`[dependencies]`  
+`openssl = { version = "0.10", features = ["vendored"] }`
+
+### **Step 5: Write the Rust Code**
+
+**Edit `src/main.rs`:**  
+Replace the contents of `src/main.rs` with the provided Rust code, including the updated version with comments and explanations.  
+To do this, open `src/main.rs` in your text editor and paste the full code you have. Here’s a brief reminder of how to edit:
+
+`nano src/main.rs`
+
+1. Or, use any other text editor of your choice.
+
+### **Step 6: Compile and Build the Project**
+
+To compile the project and generate the binary, run the following command:
+
+`cargo build --release`
+
+This will build the project in release mode, creating an optimized binary. The output will be located in the `target/release` directory under the name `fast-fwsign`.
+
+### **Step 7: Running the Program**
+
+Once the project is built, you can run the program using the generated binary. Below are the examples of how to run different commands:
+
+**Key Generation:**  
+Generate a pair of ECDSA keys:
+
+`./target/release/fast-fwsign keygen priv.key pub.key mypassword`
+
+1. This command will generate `priv.key` (private key) and `pub.key` (public key) with `mypassword` as the encryption password for the private key.
+
+**Encryption:**  
+Encrypt a file using ChaCha20-Poly1305 and sign it using ECDSA:
+
+`./target/release/fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword`
+
+2. Replace `firmware.bin` with the input file you want to encrypt, `firmware.crypt` as the output file, and use the appropriate key files.
+
+**Decryption:**  
+Decrypt a file and verify its signature using ECDSA:
+
+`./target/release/fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender.pub.key mypassword`
+
+3. Replace `firmware.crypt` with the encrypted file, `firmware.dec` with the output file, and use the appropriate key files.
+
+### **Step 8: Troubleshooting and Tips**
+
+* If you encounter issues with OpenSSL during compilation, ensure that the OpenSSL library is correctly installed and accessible. You might need to set environment variables like `OPENSSL_DIR` to point to your OpenSSL installation.  
+* Use `cargo clean` if you want to clean the project and rebuild it from scratch.  
+* Check Rust documentation and OpenSSL crate documentation for more advanced usage and configurations.
+
 
    
