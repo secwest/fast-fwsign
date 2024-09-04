@@ -28,56 +28,80 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// fast-fwsign: A utility for generating ECDSA keys, encrypting, and decrypting files
+/ fast-fwsign: A utility for generating ECDSA keys, encrypting, and decrypting files
 // with ChaCha20-Poly1305 and ECDSA signatures.
 //
-// Build Instructions:
-// -------------------
-// To compile this Rust program, ensure you have OpenSSL installed and available on your system.
-// Use the following Cargo.toml configuration to manage dependencies:
+// Build and Setup Instructions:
+// ------------------------------
+// This program is written in Rust and uses Cargo as its package manager. Follow these steps
+// to set up and build the project. Ensure you have Rust (at least version 1.56.0) and Cargo installed.
 //
-// [package]
-// name = "fast-fwsign"
-// version = "0.1.0"
-// authors = ["Dragos Ruiu <dr@secwest.net>"]
-// edition = "2021"
+// 1. Install Rust and Cargo:
+//    If Rust and Cargo are not installed, you can install them using the official installation script:
+//        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+//    Follow the on-screen instructions to complete the installation. Verify the installation with:
+//        rustc --version
 //
-// [dependencies]
-// openssl = { version = "0.10", features = ["vendored"] }
-// 
-// To build and run the program, execute the following commands:
-//     cargo build --release
+// 2. Install OpenSSL Development Libraries:
+//    This project depends on OpenSSL for cryptographic functions. Install OpenSSL development libraries.
+//    On Debian-based systems, you can install them using:
+//        sudo apt-get install libssl-dev
+//    For other operating systems, use the appropriate package manager to install OpenSSL development libraries.
 //
-// This will create an optimized binary in the target/release directory named `fast-fwsign`.
-// 
-// Usage:
-// ------
-// The `fast-fwsign` utility supports three main commands: key generation, encryption, and decryption.
+// 3. Create a New Rust Project:
+//    Choose a directory where you want to create your Rust project. Open a terminal and run:
+//        mkdir fast-fwsign
+//        cd fast-fwsign
+//    This creates a directory named `fast-fwsign` and navigates into it.
 //
-// 1. Key Generation:
-//    Generate a pair of ECDSA keys (private and public).
-//    Command:
-//        ./fast-fwsign keygen <private_key_file> <public_key_file> <password>
+//    Initialize a new Rust project using Cargo:
+//        cargo init
+//    This command creates a basic Rust project structure with a `Cargo.toml` file and a `src` directory.
 //
-//    Example:
-//        ./fast-fwsign keygen priv.key pub.key mypassword
+// 4. Configure Cargo.toml File:
+//    Open the `Cargo.toml` file in your preferred text editor and add the following content:
+//    
+//        [package]
+//        name = "fast-fwsign"
+//        version = "0.1.0"
+//        authors = ["Dragos Ruiu <dr@secwest.net>"]
+//        edition = "2021"
 //
-// 2. Encryption:
-//    Encrypt a file using ChaCha20-Poly1305 and sign it using ECDSA.
-//    Command:
-//        ./fast-fwsign encrypt <input_file> <output_file> <private_key_file> <receiver_pubkey_file> <password>
+//        [dependencies]
+//        openssl = { version = "0.10", features = ["vendored"] }
+//    
+//    This configuration specifies the package information and the dependencies required for the project.
 //
-//    Example:
-//        ./fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword
+// 5. Write the Rust Code:
+//    Replace the contents of `src/main.rs` with the provided Rust code, including the updated version
+//    with comments and explanations. Use a text editor to open `src/main.rs` and paste the full code.
 //
-// 3. Decryption:
-//    Decrypt a file and verify its signature using ECDSA.
-//    Command:
-//        ./fast-fwsign decrypt <input_file> <output_file> <private_key_file> <sender_pubkey_file> <password>
+// 6. Compile and Build the Project:
+//    To compile the project and generate the binary, run the following command:
+//        cargo build --release
+//    This will build the project in release mode, creating an optimized binary located in the `target/release` directory.
 //
-//    Example:
-//        ./fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender.pub.key mypassword
-
+// 7. Running the Program:
+//    Once the project is built, you can run the program using the generated binary. Below are examples:
+//
+//    - Key Generation:
+//        ./target/release/fast-fwsign keygen priv.key pub.key mypassword
+//        This command generates a private key (`priv.key`) and a public key (`pub.key`) with `mypassword` as the private key password.
+//
+//    - Encryption:
+//        ./target/release/fast-fwsign encrypt firmware.bin firmware.crypt priv.key receiver_pub.key mypassword
+//        Replace `firmware.bin` with the input file to encrypt, `firmware.crypt` as the output file, and use the appropriate key files.
+//
+//    - Decryption:
+//        ./target/release/fast-fwsign decrypt firmware.crypt firmware.dec priv.key sender.pub.key mypassword
+//        Replace `firmware.crypt` with the encrypted file, `firmware.dec` with the output file, and use the appropriate key files.
+//
+// 8. Troubleshooting and Tips:
+//    - If you encounter issues with OpenSSL during compilation, ensure that OpenSSL is correctly installed and accessible.
+//      You might need to set environment variables like `OPENSSL_DIR` to point to your OpenSSL installation.
+//    - Use `cargo clean` if you need to clean the project and rebuild it from scratch.
+//    - Refer to Rust documentation and OpenSSL crate documentation for more advanced usage and configurations.
+//
 use openssl::ec::{EcGroup, EcKey};
 use openssl::pkey::PKey;
 use openssl::rand::rand_bytes;
